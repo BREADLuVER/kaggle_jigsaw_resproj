@@ -29,9 +29,13 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('--config_file', type=str, required=True)
     parser.add_argument('--valid', action='store_true')
+    parser.add_argument('--old', action='store_true')  # Add this line
     args = parser.parse_args()
 
     config_file = Path(args.config_file)
+    if not config_file.exists():
+        raise FileNotFoundError(f"Config file {config_file} not found.")
+        
     config = load_config(config_file)
 
     config.setdefault('max_len', 220)
@@ -48,21 +52,23 @@ def main():
     config.setdefault('device', 'cuda')
     config.setdefault('seed', 1234)
 
-    assert 'lm_model_name' in config
-    assert not (config.old_fine_tuned and config.old_data)
-    assert config.max_len >= config.max_head_len
-    assert config.epochs <= 2
+    assert 'lm_model_name' in config, "lm_model_name is required in the configuration."
+    assert not (config['old_fine_tuned'] and config['old_data']), "Cannot use old_fine_tuned and old_data together."
+    assert config['max_len'] >= config['max_head_len'], "max_len must be greater than or equal to max_head_len."
+    assert config['epochs'] <= 2, "epochs must be 2 or less."
 
     lm_model_name = config_file.stem
     if config.old_fine_tuned:
         PRETRAINED_PATH = Path(f'../output/{lm_model_name}_old_fine_tune/')
         assert PRETRAINED_PATH.exists()
     else:
-        PRETRAINED_PATH = args.lm_model
-    MODE = args.lm_model[:4]
-    LOWER_CASE = 'uncased' in args.lm_model
-    LARGE_MODEL = 'large' in args.lm_model
-    DEVICE = torch.device(config.device)
+        PRETRAINED_PATH = lm_model_name
+    
+    # Deriving variables from lm_model_name instead of the file stem
+    MODE = lm_model_name[:4]
+    LOWER_CASE = 'uncased' in lm_model_name
+    LARGE_MODEL = 'large' in lm_model_name
+    DEVICE = torch.device(config['device'])
 
     if config.old_data:
         lm_model_name += '_old_fine_tune'
@@ -78,7 +84,7 @@ def main():
     OUT_DIR = Path(f'../output/{lm_model_name}/')
     TEST_SUBMISSION = OUT_DIR / 'submission.csv'
     VALID_SUBMISSION = OUT_DIR / 'valid_submission.csv'
-    OUT_DIR.mkdir(exist_ok=True)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     warnings.filterwarnings('ignore')
     seed_torch(config.seed)
@@ -102,7 +108,7 @@ def main():
         from pytorch_pretrained_bert import BertTokenizer, BertForSequenceClassification, BertAdam
 
         lm_tokenizer = BertTokenizer.from_pretrained(
-            args.lm_model, cache_dir=None, do_lower_case=LOWER_CASE)
+            lm_model_name, cache_dir=None, do_lower_case=LOWER_CASE)
         model = BertForSequenceClassification.from_pretrained(
             PRETRAINED_PATH, cache_dir=None, num_labels=1 + len(AUX_TOXICITY_COLUMNS))
         optimizer_class = BertAdam
