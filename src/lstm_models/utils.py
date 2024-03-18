@@ -223,14 +223,14 @@ class EMA(object):
                 param.data = self.shadow[name]
 
     def on_batch_end(self, model):
-        if self.level is 'batch':
+        if self.level == 'batch':
             self.cnt -= 1
             if self.cnt == 0:
                 self._update(model)
                 self.cnt = self.n
 
     def on_epoch_end(self, model):
-        if self.level is 'epoch':
+        if self.level == 'epoch':
             self._update(model)
 
 
