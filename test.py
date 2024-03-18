@@ -1,5 +1,7 @@
 import torch
+import collections
 
+print(collections)
 print(f"PyTorch Version: {torch.__version__}")
 print(f"CUDA Available: {torch.cuda.is_available()}")
 print(f"Devices:")
