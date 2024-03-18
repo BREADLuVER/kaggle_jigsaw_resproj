@@ -8,6 +8,10 @@ import pandas as pd
 import torch
 from tqdm import tqdm
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from config.base import (
     TOXICITY_COLUMN, IDENTITY_COLUMNS, AUX_TOXICITY_COLUMNS,
     OLD_TOXICITY_COLUMN, OLD_IDENTITY_COLUMNS, OLD_AUX_TOXICITY_COLUMNS,
