@@ -1,6 +1,8 @@
 import torch
 import collections
+import sys
 
+print(sys.path)
 print(collections)
 print(f"PyTorch Version: {torch.__version__}")
 print(f"CUDA Available: {torch.cuda.is_available()}")

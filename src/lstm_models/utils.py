@@ -6,12 +6,13 @@ import time
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn as nn
 from tqdm import tqdm
 
 from .optim import AdamW
 from ..data import TextDataset, LengthBucketingDataLoader
 from ..metrics import JigsawEvaluator, accuracy
-from ...config.base import IDENTITY_COLUMNS
+from config.base import IDENTITY_COLUMNS
 
 
 def train(model: nn.Module, loss_fn: nn.Module, train_dataset: TextDataset, valid_dataset: TextDataset,
